@@ -44,6 +44,22 @@ func main() {
 	// fmt.Printf("%T\n", g)
 
 	// Assignment of arrays.
+	// create slices with make and specefic length and capacity.
+	a := make([]int, 5)
+	printSlice("a", a)
+
+	b := make([]int, 0, 5)
+	printSlice("b", b)
+
+	c := b[:2]
+	printSlice("c", c)
+
+	d := c[2:5]
+	printSlice("d", d)
+
+
+
+
 
 	var arrfruit [3]string = [3]string{"apple", "banana", "orange"}
 	var arrfruit2 [3]string
@@ -75,3 +91,8 @@ func main() {
 	fmt.Println(len(fruitSlice2))
 	//fmt.Println(fruitSlice2[2:4]) This line will cause an error.(panic: runtime error: slice bounds out of range)
  }
+
+ func printSlice(s string, x []int) {
+	fmt.Printf("%s len=%d cap=%d %v\n",
+		s, len(x), cap(x), x)
+}
