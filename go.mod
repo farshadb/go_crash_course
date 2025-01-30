@@ -1,5 +1,3 @@
-module go_crash_course
+module github.com/farshadb/go_crash_course.git
 
-go 1.18
-
-require github.com/F4r5h4d/go_crash_course v0.0.0-20220718114445-6f8dda6ef66f // indirect
+go 1.23.4
