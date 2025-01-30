@@ -1,12 +1,11 @@
 package main
 
-import (  
-    "fmt"
+import (
+	"fmt"
 )
 
-func main() {  
-    a := [3]int32{12} 
-    fmt.Println(a)
+func main() {
+	a := [3]int32{12}
+	fmt.Println(a)
 	fmt.Printf("%T\n", a)
-
 }

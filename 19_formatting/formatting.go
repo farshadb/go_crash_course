@@ -1,6 +1,100 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
+
+// addThousandSeparator adds commas as thousand separators to a number
+func addThousandSeparator[T ~int | ~int64 | ~float64](num T) string {
+	switch v := any(num).(type) {
+	case int:
+		return formatInteger(v)
+	case float64:
+		return formatFloat(v)
+	default:
+		return fmt.Sprintf("%v", v)
+	}
+}
+
+// formatInteger formats an integer with thousand separators
+func formatInteger(input interface{}) string {
+	var s string
+	switch v := input.(type) {
+	case int:
+		s = strconv.Itoa(v)
+	case string:
+		s = v
+	default:
+		return ""
+	}
+
+	// Initialize string builder with pre-allocated capacity
+	var buf strings.Builder
+
+	// The capacity is the length of the input string plus potential commas
+	buf.Grow(len(s) + len(s)/3)
+
+	// Track starting position for digit processing
+	startOffset := 0
+
+	// Handle negative numbers by writing minus sign
+	// and adjusting start position
+	if s[0] == '-' {
+		buf.WriteByte('-')
+		startOffset = 1
+	}
+
+	length := len(s)
+	for i := startOffset; i < length; i++ {
+		if (length-i)%3 == 0 && i != startOffset {
+			buf.WriteByte(',')
+		}
+		buf.WriteByte(s[i])
+	}
+
+	return buf.String()
+}
+
+// formatFloat formats a float64 with thousand separators while preserving precision
+func formatFloat(n float64) string {
+	if n == 0 {
+		return "0"
+	}
+
+	// Use strconv.FormatFloat to preserve original precision
+	s := strconv.FormatFloat(n, 'f', -1, 64)
+	parts := strings.Split(s, ".")
+
+	// Format the integer part
+	integerPart := formatInteger(mustAtoi(parts[0]))
+
+	// Add decimal part if it exists
+	if len(parts) > 1 {
+		return fmt.Sprintf("%s.%s", integerPart, parts[1])
+	}
+	return integerPart
+}
+
+// mustAtoi converts string to int, panics on error (safe for our use case as we control the input)
+func mustAtoi(s string) int {
+	n, err := strconv.Atoi(s)
+	if err != nil {
+		panic(err) // This should never happen given our input control
+	}
+	return n
+}
+
+// Person implements fmt.Stringer for better formatting
+type Person struct {
+	Name string
+	Age  int
+}
+
+func (p Person) String() string {
+	return fmt.Sprintf("%s (%d years old)", p.Name, p.Age)
+}
 
 func main() {
 	// Basic Formatting
@@ -61,14 +155,12 @@ func main() {
 	fmt.Printf("%%-10s (left-justified): %-10s|\n", "hello") // Output: hello     |
 	fmt.Printf("%%+d (explicit sign): %+d\n", 42)            // Output: +42
 	fmt.Printf("%% d (space padding): % d\n", 42)            // Output:  42
-	fmt.Printf("%%'d (digit grouping): %'d\n", 1000000)      // Output: 1,000,000
 
-	// Custom Formatting with fmt.Stringer
-	type Person struct {
-		Name string
-		Age  int
-	}
+	fmt.Printf("Integer: %s\n", addThousandSeparator(1000000000000000000))   // Output: 1,000,000,000,000,000,000
+	fmt.Printf("Float: %s\n", addThousandSeparator(1234567.89))              // Output: 1,234,567.89
+	fmt.Printf("Large Float: %s\n", addThousandSeparator(1234567890000.891)) // Output: 1,234,567,890,000.891
 
+	// Person struct formatting
 	person := Person{"Farshad", 30}
-	fmt.Printf("%%v (custom String()): %v\n", person) // Output: Farshad (30 years old)
+	fmt.Printf("Person: %v\n", person) // Output: Farshad (30 years old)
 }
